@@ -6,9 +6,10 @@
         <div class="card-body">
           <h2 class="card-title">{{ product.name }}</h2>
           <div class="d-flex card-text justify-content-between">
-            <span class="fs-3 fw-bold">{{ product.price }} р</span>
-            <span class="fs-3 fw-bold">{{ product.expireAt }}</span>
-          </div>
+            <span class="fs-3 fw-bold">{{ product.unit }}</span>
+            <span class="fs-2 fw-bold">{{ product.price }} ₽</span>
+            <span class="fs-3 fw-bold " :class="getTextColorClass()">{{ product.expireAt }}</span>
+          </div>    
         </div>
       </div>
     </div>
@@ -40,7 +41,11 @@
               <div class="form-group">
                 <label for="unit">Единица измерения</label>
                 <div class="input-group">
-                  <input type="text" id="unit" v-model="product.unit" class="form-control" @input="onInputChange('unit')">
+                <select id="unit" v-model="product.unit" class="form-control" required>
+                  <option value="1/шт">1/шт</option>
+                  <option value="100/гр">100/гр</option>
+                  <option value="1/кг">1/кг</option>
+                </select>
                   <button v-if="isFieldModified('unit')" type="button" class="btn btn-success" @click="saveField('unit')">Сохранить</button>
                 </div>
               </div>
@@ -84,7 +89,9 @@
   
   <script>
   import axios from 'axios';
-  
+  import { toast } from 'vue3-toastify';
+  import { useProductsStore } from '../../stores/products';
+
   export default {
     props: {
       product: {
@@ -98,8 +105,13 @@
         salesCount: 0
       };
     },
+    computed:{
+        initialProductComputed(){
+            return this.initialProduct = JSON.parse(JSON.stringify(this.product));
+        }
+    },
     created() {
-      this.initialProduct = JSON.parse(JSON.stringify(this.product));
+        this.initialProductComputed
     },
     methods: {
       getImageUrl(productId) {
@@ -112,18 +124,59 @@
         // Обработчик изменения значения в инпуте
       },
       updateSell(){
+        const store = useProductsStore();
         axios.post('api/product/sell',{
             product: this.product,
             quantity: this.salesCount
-        }).catch(e => console.log(e))
+        }).then(res => {
+            store.fetchProducts();
+            toast.success('Остатов успешно обнавлен', {
+            autoClose: 1000
+            })
+        }).catch(e => {
+            toast.error('Ошибка Повторите попытку', {
+            autoClose: 1000
+            })
+            console.log(e)
+        }).finally(() => {
+            setTimeout(() => {
+            this.initialProduct.stock = this.product.stock
+            this.salesCount = 0;
+           }, 1000)
+        })
       },
+      getTextColorClass() {
+        const currentDate = new Date();
+        const expireDate = new Date(this.product.expireAt);
+        const timeDifference = expireDate - currentDate;
+        const oneWeek = 7 * 24 * 60 * 60 * 1000; // Временной интервал для недели
+        const oneMonth = 30 * 24 * 60 * 60 * 1000; // Временной интервал для месяца
+
+        if (timeDifference < oneWeek) {
+            return 'text-danger'; // Красный цвет текста для менее недели
+        } else if (timeDifference < oneMonth) {
+            return 'text-warning'; // Оранжевый цвет текста для менее месяца
+        } else {
+            return 'text-success'; // Зеленый цвет текста для более месяца
+        }
+    },
       saveField(field) {
         console.log(this.product[field]);
         axios.post('api/product/update',{
             field: field,
             value: this.product[field],
             productId: this.product.id
-        }).catch(e => console.log(e))
+        }).then(res => {
+            this.initialProduct[field] = this.product[field]
+            toast.success(field +'товара успешно обнавлен', {
+            autoClose: 1000
+            })
+        }).catch(e => {
+            console.log(e)
+            toast.error('Ошибка Повторите попытку', {
+            autoClose: 1000
+            })
+        })
         // Сохранение поля на сервере
       }
     }

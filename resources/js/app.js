@@ -6,13 +6,11 @@
 
 import './bootstrap';
 import { createApp } from 'vue';
-import store from './store.js';
+import { createPinia } from 'pinia';
+import 'vue3-toastify/dist/index.css';
+const pinia = createPinia()
 const app = createApp({});
-app.config.globalProperties.$notify = function (message, type = 'success') {
-    app.config.globalProperties.$store.dispatch('showNotification', { message, type });
-};  
 import products from './components/Product/list.vue';
-app.provide('store', store);
+app.use(pinia);
 app.component('products', products);
-
 app.mount('#app');

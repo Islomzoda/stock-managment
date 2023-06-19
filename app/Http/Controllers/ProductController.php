@@ -16,7 +16,7 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'unit' => 'required|in:шт,гр',
+            'unit' => 'required|in:1/шт,100/гр,1/кг',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
             'expireAt' => 'required|date',

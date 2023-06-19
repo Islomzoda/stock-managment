@@ -25,8 +25,9 @@
               <div class="mb-3">
                 <label for="unit">Единица измерения:</label>
                 <select id="unit" v-model="product.unit" class="form-control" required>
-                  <option value="шт">шт</option>
-                  <option value="гр">гр</option>
+                  <option value="1/шт">1/шт</option>
+                  <option value="100/гр">100/гр</option>
+                  <option value="1/кг">1/кг</option>
                 </select>
               </div>
               <div class="mb-3">
@@ -57,6 +58,8 @@
 </template>
 
 <script>
+import { toast } from 'vue3-toastify';
+import { useProductsStore } from '../../stores/products';
 export default {
   data() {
     return {
@@ -73,7 +76,9 @@ export default {
   },
   methods: {
     submitForm() {
+      const productStore = useProductsStore()
       const formData = new FormData();
+
       formData.append('name', this.product.name);
       formData.append('description', this.product.description);
       formData.append('unit', this.product.unit);
@@ -83,16 +88,7 @@ export default {
       formData.append('image', this.$refs.image.files[0]);
 
       // Отправка данных на сервер
-      axios.post('/api/product/create', formData)
-        .then(response => {
-          // Обработка успешного ответа
-          console.log(response.data);
-
-        })
-        .catch(error => {
-          // Обработка ошибки
-          console.error(error);
-        });
+      productStore.createProduct(formData)
     }
   }
 };

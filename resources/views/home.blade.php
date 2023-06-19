@@ -11,7 +11,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    @if (auth()->user()->role !== 'user')
+                    @if (auth()->user()->role !== 'admin')
                     <products></products>
                     @endif
 

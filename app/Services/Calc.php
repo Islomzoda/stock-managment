@@ -8,15 +8,24 @@ class Calc{
         $quantity = $data['quantity'];
         $unit = $data['unit'];
         $price = $data['price'];
-
-        if ($unit === 'шт') {
-            $result = $quantity * $price;
-        } elseif ($unit === 'гр') {
-            $result = ($quantity / 100) * $price;
-        } else {
-            // Обработка некорректного значения unit
-            $result = 0;
+        switch ($unit) {
+            case '1/шт':
+                $result = $quantity * $price;
+                break;
+            
+            case '1/кг':
+                $result = ($quantity / 1000) * $price;
+                break;
+            
+            case '100/гр':
+                $result = ($quantity / 100) * $price;
+                break;
+            
+            default:
+                $result = 0;
+                break;
         }
+      
         return $result;
     }
 }
