@@ -4,7 +4,7 @@
       <div class="container">
         <div class="row mt-3">
           <div class="col-12">
-            <input v-model="searchQuery" type="text" class="form-control" placeholder="Поиск">
+            <input v-model="searchQuery" type="text" class="form-control" placeholder="Поиск"  @input="searchProducts">
           </div>
         </div>
   
@@ -66,13 +66,6 @@
   
       const searchProducts = () => {
         productsStore.searchProducts(searchQuery.value)
-          .then(response => {
-            productsStore.setProducts(response.data.products);
-            pagination.value = response.data.pagination;
-          })
-          .catch(error => {
-            console.error(error);
-          });
       };
       fetchProducts();
       return {
